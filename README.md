@@ -2,21 +2,27 @@
 
 > Manipulate asynchronous operations
 
-Work with Node.js-style callbacks in a safe way. The API is modeled after Promises, while async-then doesn't need (or support) promises.
+Work with Node-style callbacks in a safe way. The API is modeled after Promises, while async-then doesn't need (or support) promises.
+
+* __No promises__ - async-then works with Node-style callbacks (`err, result`), and does _not_ support promises. It lets you work these kinds of operations in a way you would with Promises/A+ without actually using promises.
+
+* __No wrappers__ - unlike other solutions like [co][] v3, there's no need to wrap your callback-style functions into thunks or promise-generators.
 
 __NB:__ _This is a proof-of-concept of applying Promise idioms to callbacks. This package won't likely be supported._
+
+[co]: https://github.com/tj/co
 
 ## Comparison
 
 Callbacks:
 
 ```js
-request('http://site.com', (err, result) => {
+
+fs.readFile('url.txt', (err, data) => {
   if (err) throw err
 
-  var nextPage = result.nextPage
-
-  request('http://site.com/' + nextPage, (err, result) => {
+  var url = data.trim()
+  request(url, (err, result) => {
     if (err) throw err
 
     console.log(result)
@@ -27,12 +33,12 @@ request('http://site.com', (err, result) => {
 Chain:
 
 ```js
-var nextPage
+var url
 
 chain()
-  .then((_, next) => request('http://site.com', next))
-  .then((result) => { nextPage = result.nextPage })
-  .then((_, next) => request('http://site.com/' + nextPage, next))
+  .then((_, next) => fs.readFile('url.txt', next))
+  .then((data) => { url = data.trim() })
+  .then((_, next) => request(url, next))
   .end((err, result) {
     if (err) throw err
     console.log(result)
