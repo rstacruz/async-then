@@ -8,6 +8,8 @@ Work with Node-style callbacks in a safe way. The API is modeled after Promises,
 
 * __No wrappers__ - unlike other solutions like [co][] v3, there's no need to wrap your callback-style functions into thunks or promise-generators.
 
+* __Error catching__ - no need for extraneous `if (err) throw err`. Error flow is managed like promises with `.catch()`.
+
 __NB:__ _This is a proof-of-concept of applying Promise idioms to callbacks. This package won't likely be supported._
 
 [co]: https://github.com/tj/co
@@ -93,6 +95,8 @@ chain()
     /* work with urls */
   })
 ```
+
+If errors are thrown, or are passed on via `next(err)`, then other `then` calls will be skipped until the next `.catch()` or `.end()`.
 
 ### chain().catch
 > `chain().catch(fn)`
