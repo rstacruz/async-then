@@ -52,8 +52,8 @@ It returns an object with `then`, `catch` and `end`.
 function getTitle (fn) {
   chain()
     .then((_, next) => { request('http://google.com', next) })
-    .then((_, next) => { next(null, cheerio.load(_)) }
-    .then(($, next) => { next(null, $('title').text()) }
+    .then((data) => cheerio.load(data))
+    .then(($) => $('title').text()))
     .end(fn)
 }
 
