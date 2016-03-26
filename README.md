@@ -29,7 +29,7 @@ function read (symlink, next) {
 For comparison, here it is without async-then:
 
 > ```js
-> function read (path, next) {
+> function read (symlink, next) {
 >   fs.readlink(path, (err, real) => {
 >     if (err) return next(err)
 >     fs.readdir(real, (err, data) => {
