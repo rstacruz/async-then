@@ -21,7 +21,7 @@ function read (symlink, next) {
   chain()
     .then((_, next)    => { fs.readlink(symlink, next) })
     .then((real, next) => { fs.readdir(real, next) })
-    .then((data)       => { next(null, data.map(d => path.join(symlink, d)) })
+    .then((data, next) => { next(null, data.map(d => path.join(symlink, d)) })
     .end(next)
 }
 ```
