@@ -4,48 +4,60 @@
 
 Work with Node-style callbacks in a safe way. The API is modeled after Promises, while async-then doesn't need (or support) promises.
 
-* __No promises__ - async-then works with Node-style callbacks (`err, result`), and does _not_ support promises. It lets you work these kinds of operations in a way you would with Promises/A+ without actually using promises.
-
-* __No wrappers__ - unlike other solutions like [co][] v3, there's no need to wrap your callback-style functions into thunks or promise-generators.
-
-* __Error catching__ - no need for extraneous `if (err) throw err`. Error flow is managed like promises with `.catch()`.
-
 __NB:__ _This is a proof-of-concept of applying Promise idioms to callbacks. This package won't likely be supported._
 
 [co]: https://github.com/tj/co
 
-## Comparison
+## Features
 
-Callbacks:
+### Waterfall flow
+
+Using [chain()] and [then()], you'll be able to run async operations one after the other, giving the result on an operation to the next operation and so on.
 
 ```js
-
-fs.readFile('url.txt', (err, data) => {
-  if (err) throw err
-
-  var url = data.trim()
-  request(url, (err, result) => {
-    if (err) throw err
-
-    console.log(result)
-  })
-})
+function read (symlink, next) {
+  chain()
+    .then((_, next)    => { fs.readlink(symlink, next) })
+    .then((real, next) => { fs.readdir(real, next) })
+    .then((data)       => { next(null, data.map(d => path.join(symlink, d)) })
+    .end(next)
+}
 ```
 
-Chain:
+For comparison, here it is without async-then:
+
+> ```js
+> function read (path, next) {
+>   fs.readlink(path, (err, real) => {
+>     if (err) return next(err)
+>     fs.readdir(real, (err, data) => {
+>       if (err) return next(err)
+>       data = data.map(d => path.join(symlink, d))
+>       next(data)
+>     })
+>   })
+> }
+> ```
+
+### Error control
+
+Notice in the example above, error handling (`if (err) return next(err)`) is absent. Errors will skip through [then()] steps, moving onto the next [catch()] or [end()] instead.
 
 ```js
-var url
-
 chain()
-  .then((_, next) => fs.readFile('url.txt', next))
-  .then((data) => { url = data.trim() })
-  .then((_, next) => request(url, next))
-  .end((err, result) {
-    if (err) throw err
-    console.log(result)
-  })
+  .then((_, next) => { fs.lstat(path) })
+  .catch((err)    => { if (err !== 'ENOENT') throw err })
+  .then(...)
+  .end(...)
 ```
+
+### At a glance
+
+* __No promises__ - async-then works with Node-style callbacks (`err, result`), and does _not_ support promises. It lets you work these kinds of operations in a way you would with Promises/A+ without actually using promises.
+
+* __No wrappers__ - unlike other solutions like [co][] v3, there's no need to wrap your callback-style functions into thunks or promise-generators.
+
+* __Error catching__ - no need for extraneous `if (err) throw err`. Error flow is managed like promises with [catch()].
 
 ## API
 
@@ -57,6 +69,8 @@ Starts a chain. Compare with `Promise.resolve()` or any other promise.
 It returns an object with `then`, `catch` and `end`.
 
 ```js
+var chain = require('async-then/chain')
+
 function getTitle (fn) {
   chain()
     .then((_, next) => { request('http://google.com', next) })
@@ -103,6 +117,8 @@ If errors are thrown, or are passed on via `next(err)`, then other `then` calls 
 
 Catches errors.
 
+Like `.then()`, it also has asynchronous and synchronous forms.
+
 ### chain().end
 > `chain().end(fn)`
 
@@ -123,6 +139,8 @@ chain()
 Runs multiple async operations in parallel. Compare with `Promise.all()`.
 
 ```js
+var chain = require('async-then/all')
+
 all([
   next => { request('http://facebook.com', next) },
   next => { request('http://instagram.com', next) },
@@ -131,6 +149,12 @@ all([
   // results is an array
 })
 ```
+
+[chain()]: #chain
+[then()]: #chainthen
+[catch()]: #chaincatch
+[end()]: #chainend
+[all()]: #all
 
 ## Thanks
 

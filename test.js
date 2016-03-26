@@ -35,7 +35,6 @@ test('chain() sync', t => {
     })
 })
 
-
 test('all()', t => {
   t.plan(2)
   all([
