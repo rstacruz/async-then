@@ -6,6 +6,8 @@ Work with Node-style callbacks in a safe way. The API is modeled after Promises,
 
 __NB:__ _This is a proof-of-concept of applying Promise idioms to callbacks. This package won't likely be supported._
 
+[![Status](https://travis-ci.org/rstacruz/async-then.svg?branch=master)](https://travis-ci.org/rstacruz/async-then "See test builds")
+
 [co]: https://github.com/tj/co
 
 ## Features
