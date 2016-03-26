@@ -66,9 +66,7 @@ chain()
 ### chain
 > `chain()`
 
-Starts a chain. Compare with `Promise.resolve()` or any other promise.
-
-It returns an object with `then`, `catch` and `end`.
+Starts a chain. Compare with `Promise.resolve()` or any other promise. Returns an object with [then()], [catch()] and [end()] methods.
 
 ```js
 var chain = require('async-then/chain')
@@ -90,9 +88,10 @@ getTitle((err, title) => {
 ### chain().then
 > `chain().then(fn)`
 
-Continues a chain. The given function `fn` can be given in synchronous or asynchronous forms.
+Continues a chain; queues up another function to run when previous `then()` calls complete. In the asynchronous form, the function `fn` should accept two parameters: `result`, `next`.
 
-In the asynchronous form, `fn` should accept two parameters: `result`, `next`. The parameter `result` is the result of the previous operation. `next` is a function that should be invoked as a callback.
+#### Async
+When `fn` accepts 2 parameters (`result`, `next`), it's invoke asynchronously. The parameter `result` is the result of the previous operation. `next` is a function that should be invoked as a callback.
 
 ```js
 chain()
@@ -101,7 +100,9 @@ chain()
   .end((err, res) => { ... })
 ```
 
-In the synchronous form, `fn` should only accept 1 parameter: `result`. Whatever its return value will be the value passed to the next `then()` in the chain.
+#### Synchronous form
+
+When `fn` only accepts 1 parameter (`result`), it's invoked synchronously. Whatever its return value will be the value passed to the next `then()` in the chain.
 
 ```js
 chain()
@@ -112,21 +113,26 @@ chain()
   })
 ```
 
-If errors are thrown, or are passed on via `next(err)`, then other `then` calls will be skipped until the next `.catch()` or `.end()`.
+#### Errors
+Th `fn` function can either `throw` an error, or invoke `next` with an error. All errors will skip through the subsequent `then()` steps; it skips onto the next [catch()] or [end()].
 
 ### chain().catch
 > `chain().catch(fn)`
 
-Catches errors.
+Catches errors. It works like [then()].
+If a [catch()] operation succeeds (meaning it didn't `throw` an error, or invoke `next(err)`), it'll continue onto the next [then()] or [end()].
 
-Like `.then()`, it also has asynchronous and synchronous forms.
+```js
+chain()
+  .then((_, next) => { fs.lstat(path) })
+  .catch((err)    => { if (err !== 'ENOENT') throw err })
+  .end(...)
+```
 
 ### chain().end
 > `chain().end(fn)`
 
-Runs the chain. Without calling `.end(fn)`, the chain will not be called.
-
-The parameter `fn` is a callback that takes Node-style arguments: `err`, `result`.
+Runs the chain. Without calling `.end(fn)`, the chain will not be called. The parameter `fn` is a callback that takes Node-style arguments: `err`, `result`.
 
 ```js
 chain()
@@ -141,7 +147,7 @@ chain()
 Runs multiple async operations in parallel. Compare with `Promise.all()`.
 
 ```js
-var chain = require('async-then/all')
+var all = require('async-then/all')
 
 all([
   next => { request('http://facebook.com', next) },
