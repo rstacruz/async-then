@@ -35,7 +35,7 @@ For comparison, here it is without async-then:
 >     fs.readdir(real, (err, data) => {
 >       if (err) return next(err)
 >       data = data.map(d => path.join(symlink, d))
->       next(data)
+>       next(null, data)
 >     })
 >   })
 > }
