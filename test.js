@@ -3,7 +3,7 @@ var test = require('tape')
 var chain = require('./chain')
 var all = require('./all')
 
-test('works', t => {
+test('chain()', t => {
   t.plan(4)
   chain()
     .then((_, next) => { t.pass('runs'); next() })
@@ -23,7 +23,20 @@ test('works', t => {
     })
 })
 
-test('all', t => {
+test('chain() sync', t => {
+  t.plan(2)
+  chain()
+    .then(_ => 1)
+    .then(_ => _ + 1)
+    .end(function (err, res) {
+      t.error(err, 'has no errors')
+      t.equal(res, 2, 'chains properly')
+      t.end()
+    })
+})
+
+
+test('all()', t => {
   t.plan(2)
   all([
     next => { next(null, 'a') },
@@ -32,6 +45,17 @@ test('all', t => {
   ], (err, res) => {
     t.error(err, 'has no error')
     t.deepEqual(res, ['a', 'b', 'c'], 'has correct output')
+    t.end()
+  })
+})
+
+test('all() with errors', t => {
+  t.plan(1)
+  all([
+    next => { next('oh no') },
+    next => { next('other error') }
+  ], (err, res) => {
+    t.equal(err, 'oh no', 'reports an error')
     t.end()
   })
 })

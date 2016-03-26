@@ -49,7 +49,7 @@ function connectThen (thunk, fn) {
     try {
       thunk(function (err, result) {
         if (err) return next(err)
-        fn.length === 1 ? next(fn(result)) : fn(result, next)
+        fn.length === 1 ? next(null, fn(result)) : fn(result, next)
       })
     } catch (err) {
       next(err)
