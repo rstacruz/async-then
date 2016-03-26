@@ -1,6 +1,7 @@
 var test = require('tape')
 
 var chain = require('./chain')
+var all = require('./all')
 
 test('works', t => {
   t.plan(4)
@@ -20,4 +21,17 @@ test('works', t => {
       if (err) throw err
       t.end()
     })
+})
+
+test('all', t => {
+  t.plan(2)
+  all([
+    next => { next(null, 'a') },
+    next => { next(null, 'b') },
+    next => { next(null, 'c') }
+  ], (err, res) => {
+    t.error(err, 'has no error')
+    t.deepEqual(res, ['a', 'b', 'c'], 'has correct output')
+    t.end()
+  })
 })
