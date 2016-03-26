@@ -74,8 +74,8 @@ var chain = require('async-then/chain')
 function getTitle (fn) {
   chain()
     .then((_, next) => { request('http://google.com', next) })
-    .then((data) => cheerio.load(data))
-    .then(($) => $('title').text()))
+    .then((data)    => cheerio.load(data))
+    .then(($)       => $('title').text()))
     .end(fn)
 }
 
@@ -96,8 +96,8 @@ When `fn` accepts 2 parameters (`result`, `next`), it's invoke asynchronously. T
 ```js
 chain()
   .then((result, next) => { fs.readFile('url.txt', 'utf-8', next) })
-  .then((data, next) => { request(data, next) })
-  .end((err, res) => { ... })
+  .then((data, next)   => { request(data, next) })
+  .end((err, res)      => { ... })
 ```
 
 #### Synchronous form
@@ -107,7 +107,7 @@ When `fn` only accepts 1 parameter (`result`), it's invoked synchronously. Whate
 ```js
 chain()
   .then((result, next) => { fs.readFile('url-list.txt', 'utf-8', next) })
-  .then((data) => { return data.trim().split('\n') })
+  .then((data)         => { return data.trim().split('\n') })
   .end((err, urls) => {
     /* work with urls */
   })
