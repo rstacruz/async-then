@@ -35,6 +35,18 @@ test('chain() sync', t => {
     })
 })
 
+test('chain() thunk', t => {
+  t.plan(2)
+  chain()
+    .then(_ => next => next(null, 1))
+    .then(_ => next => next(null, _ + 1))
+    .end(function (err, res) {
+      t.error(err, 'has no errors')
+      t.equal(res, 2, 'chains properly')
+      t.end()
+    })
+})
+
 test('all()', t => {
   t.plan(2)
   all([

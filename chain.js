@@ -49,7 +49,7 @@ function connectThen (thunk, fn) {
     try {
       thunk(function (err, result) {
         if (err) return next(err)
-        fn.length === 1 ? next(null, fn(result)) : fn(result, next)
+        continue_(fn, result, next)
       })
     } catch (err) {
       next(err)
@@ -69,12 +69,24 @@ function connectCatch (thunk, fn) {
     try {
       thunk(function (err, result) {
         if (err) return fn(err, next)
-        fn.length === 1 ? next(fn(result)) : fn(null, result)
+        continue_(fn, result, next)
       })
     } catch (err) {
       fn(err, next)
     }
   }
+}
+
+/**
+ * Given that the previous operation succeeded with `result`, invoke `fn` with
+ * it. `next` is the callback `fn` should invoke when it's done.
+ */
+
+function continue_ (fn, result, next) {
+  if (fn.length > 1) return fn(result, next) /* .then((a, next) => ...) */
+  var r = fn(result)
+  /* .then(a => next => ...) -or- .then(a => result) */
+  typeof r === 'function' ? r(next) : next(null, r)
 }
 
 module.exports = chain
